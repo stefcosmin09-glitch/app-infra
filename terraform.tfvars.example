@@ -1,0 +1,11 @@
+# Copy to terraform.tfvars and fill in real values.
+# NEVER commit terraform.tfvars (contains secrets).
+
+region       = "eu-central-1"
+environment  = "staging"
+
+db_username = "tsadmin"
+db_password = "CHANGE_ME_STRONG_PASSWORD"
+
+# Set after building and pushing the Docker image to ECR:
+# container_image = "123456789012.dkr.ecr.eu-central-1.amazonaws.com/tradescheduler:latest"
