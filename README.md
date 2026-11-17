@@ -4,6 +4,8 @@ Infrastructure as Code for deploying [TradeScheduler](https://github.com/stefcos
 
 This is a **learning project**, but built like a production skeleton: commented Terraform files, remote state, private networking, secrets management, and a repeatable release flow.
 
+> 📘 **Document de învățare (în română):** [INVATARI.md](INVATARI.md) — explicații pe concepte, greșelile făcute și lecțiile lor, ordinea de deploy, depanare și întrebări de verificare pentru interviu.
+
 > **Demo result (verified 2026-11-17):** `GET http://app-infra-staging-alb-2008841282.eu-central-1.elb.amazonaws.com/health` → `HTTP 200` `{"status":"ok"}`.
 > The DNS name is temporary — query it again with `terraform output -raw alb_dns_name` after any redeploy.
 
