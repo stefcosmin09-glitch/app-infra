@@ -20,9 +20,13 @@ resource "aws_db_subnet_group" "main" {
 resource "aws_db_instance" "main" {
   identifier = "${var.project_name}-${var.environment}-db"
 
-  # Engine: PostgreSQL (app uses PostgreSQL in production)
-  engine         = "postgres"
-  engine_version = "16.9"
+  # Engine: PostgreSQL (app uses PostgreSQL in production).
+  # Pin only the MAJOR version: with auto_minor_version_upgrade = true (the
+  # default), the AWS provider resolves "16" to the newest available minor
+  # (e.g. 16.15). Hardcoding "16.9" broke after AWS retired that minor version.
+  engine                     = "postgres"
+  engine_version             = "16"
+  auto_minor_version_upgrade = true
 
   # Sizing: smallest instance + 20 GB gp3 storage
   instance_class    = "db.t3.micro"

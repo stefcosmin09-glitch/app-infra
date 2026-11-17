@@ -174,7 +174,8 @@ An AWS Budget named **`Project`** is configured at **$5/month** — deliberately
 - **Data sources are read at plan time**, so `validate` can pass while `plan` fails on missing external resources.
 - **Fargate needs `awsvpc`** because there is no EC2 host — each task gets its own ENI.
 - **Health checks are the contract between ALB and ECS.** `target_type = "ip"`, `/health` returning 200, and the ECS service registering targets are all part of the same chain.
-- **Free-tier RDS has quirks:** backup retention > 1 day is rejected, and not every engine version is available (`16.9` worked, `16.3` did not).
+- **Free-tier RDS has quirks:** backup retention > 1 day is rejected. AWS also *retires* minor engine versions over time — pin only the major version (`engine_version = "16"`) and let `auto_minor_version_upgrade` resolve the newest available minor. Hardcoding `16.9` worked during the first deploy and failed a few hours later.
+- **`terraform destroy` can fail on ECR:** AWS refuses to delete a repository that still contains images (`RepositoryNotEmptyException`). For demos use `force_delete = true`; in production prune images with a lifecycle policy instead.
 - **Debugging order matters:** ECS events → task `stoppedReason` → CloudWatch logs → target health → `curl` the ALB.
 
 ---
