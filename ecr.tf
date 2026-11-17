@@ -7,6 +7,11 @@ resource "aws_ecr_repository" "tradescheduler" {
     scan_on_push = true
   }
 
+  # DEMO ONLY: let `terraform destroy` remove the repo even if images remain.
+  # AWS otherwise refuses with RepositoryNotEmptyException. In production keep
+  # this false and prune images explicitly (lifecycle policy) instead.
+  force_delete = true
+
   tags = {
     Name        = "tradescheduler"
     Project     = var.project_name
