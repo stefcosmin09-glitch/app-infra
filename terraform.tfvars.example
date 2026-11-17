@@ -1,11 +1,40 @@
 # Copy to terraform.tfvars and fill in real values.
 # NEVER commit terraform.tfvars (contains secrets).
+# ───────────────────────────────────────────────────────────────────
+# ⚠️ APP-SPECIFIC block — replace these when deploying another application.
+# Values below are TradeScheduler's. They must stay in sync with
+# scripts/create-secrets.sh and scripts/build-and-push.sh.
+# ───────────────────────────────────────────────────────────────────
 
-region       = "eu-central-1"
-environment  = "staging"
+app_name   = "tradescheduler"   # ECR repo + ECS container name
+app_port   = 8080               # must match Dockerfile EXPOSE
 
+health_check_path    = "/health"  # must be implemented by your app
+health_check_matcher = "200"      # expected HTTP status when healthy
+
+db_name     = "tradescheduler"
 db_username = "tsadmin"
 db_password = "CHANGE_ME_STRONG_PASSWORD"
+db_port     = 5432
+
+# Secrets Manager names (created by scripts/create-secrets.sh)
+secret_db_url_name = "db-url"
+secret_key_name    = "secret-key"
+
+# Env var names the app reads from os.getenv(...)
+env_database_url = "DATABASE_URL"
+env_secret_key   = "SECRET_KEY"
+
+# Plain (non-secret) env vars for the container
+app_environment = {
+  FLASK_ENV = "production"   # REPLACE: e.g. NODE_ENV = "production"
+}
+
+# ───────────────────────────────────────────────────────────────────
+# Generic settings — usually unchanged
+# ───────────────────────────────────────────────────────────────────
+region      = "eu-central-1"
+environment = "staging"
 
 # Set after building and pushing the Docker image to ECR:
 # container_image = "123456789012.dkr.ecr.eu-central-1.amazonaws.com/tradescheduler:latest"

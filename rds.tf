@@ -33,7 +33,8 @@ resource "aws_db_instance" "main" {
   allocated_storage = 20
   storage_type      = "gp3"
 
-  # Credentials: from variables (never hardcode)
+  # ⚠️ APP-SPECIFIC credentials: db_name / db_username / db_password
+  # come from terraform.tfvars (password is never committed).
   db_name  = var.db_name
   username = var.db_username
   password = var.db_password

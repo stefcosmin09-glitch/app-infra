@@ -87,6 +87,34 @@ app-infra/
 
 ---
 
+## ⚠️ Adapting this stack for a different application
+
+This is a **complete application deploy**, not just empty infrastructure. Everything specific to TradeScheduler is marked with `REPLACE` in the code and centralized in `variables.tf` + `terraform.tfvars.example`. Change these values (in `terraform.tfvars`, not by editing `.tf` files):
+
+| What to change | Terraform variable | TradeScheduler default | Script env var |
+|---|---|---|---|
+| ECR repo + container name | `app_name` | `tradescheduler` | `REPO` |
+| Container port | `app_port` | `8080` | — (Dockerfile `EXPOSE`) |
+| Health endpoint | `health_check_path` | `/health` | — |
+| Expected health status | `health_check_matcher` | `200` | — |
+| DB name / user / password / port | `db_name`, `db_username`, `db_password`, `db_port` | `tradescheduler`, `tsadmin`, …, `5432` | `DB_NAME`, `DB_USER`, `DB_PORT` |
+| DB engine in connection string | — | `postgresql` | `DB_ENGINE` |
+| Secret names | `secret_db_url_name`, `secret_key_name` | `db-url`, `secret-key` | `SECRET_DB_URL_NAME`, `SECRET_KEY_NAME` |
+| Env var names the app reads | `env_database_url`, `env_secret_key` | `DATABASE_URL`, `SECRET_KEY` | — |
+| Non-secret env vars | `app_environment` | `{ FLASK_ENV = "production" }` | — |
+| App source directory | — | `../scheduler-app` | `APP_DIR` |
+| Image tag | `container_image` | `latest` | `IMAGE_TAG` |
+
+**Three contracts your new app must satisfy**, or ECS will never become healthy:
+
+1. The Dockerfile must `EXPOSE` the same port as `app_port`.
+2. It must answer `200` on `health_check_path` (or whatever you set as matcher).
+3. It must read the DB URL / signing key from the env var names you configured.
+
+**If your app has no signing key** (most non-Flask apps): remove `secret_key_name` / `env_secret_key` from `variables.tf`, delete the second `data "aws_secretsmanager_secret"` and its `secrets` entry in `ecs.tf`, and delete the second `create-secret` block in `scripts/create-secrets.sh`.
+
+---
+
 ## Prerequisites
 
 - AWS CLI configured with an IAM user (never root)

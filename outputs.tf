@@ -12,7 +12,7 @@ output "alb_dns_name" {
 # Registry URI used by `docker push` when releasing a new image.
 output "ecr_repository_url" {
   description = "ECR repository URI (append :TAG when pushing)"
-  value       = aws_ecr_repository.tradescheduler.repository_url
+  value       = aws_ecr_repository.app.repository_url
 }
 
 # Cluster/service names — handy for `aws ecs ...` debugging commands.

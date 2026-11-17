@@ -1,4 +1,10 @@
 # ── ECS Fargate ────────────────────────────────────────
+#
+# ⚠️ APP-SPECIFIC values in this file all come from variables.tf:
+#   var.app_name, var.app_port, var.health_check_path,
+#   var.secret_db_url_name / var.secret_key_name,
+#   var.env_database_url / var.env_secret_key, var.app_environment.
+# Change them in terraform.tfvars — do not edit literals here.
 
 # CloudWatch log group for container logs
 resource "aws_cloudwatch_log_group" "app" {
@@ -41,11 +47,11 @@ resource "aws_ecs_cluster" "main" {
 # IMPORTANT: data sources are read at PLAN time, so these secrets must
 # already exist in Secrets Manager before `terraform plan` will succeed.
 data "aws_secretsmanager_secret" "db_url" {
-  name = "${var.project_name}/${var.environment}/db-url"
+  name = "${var.project_name}/${var.environment}/${var.secret_db_url_name}"
 }
 
 data "aws_secretsmanager_secret" "secret_key" {
-  name = "${var.project_name}/${var.environment}/secret-key"
+  name = "${var.project_name}/${var.environment}/${var.secret_key_name}"
 }
 
 # Task Definition: describes how to run the container
@@ -60,8 +66,9 @@ resource "aws_ecs_task_definition" "app" {
 
   container_definitions = jsonencode([
     {
-      name      = "app"
-      image     = var.container_image != "" ? var.container_image : "${aws_ecr_repository.tradescheduler.repository_url}:latest"
+      # REPLACE: container name and ECR repo both come from var.app_name.
+      name      = var.app_name
+      image     = var.container_image != "" ? var.container_image : "${aws_ecr_repository.app.repository_url}:latest"
       essential = true
 
       portMappings = [
@@ -72,19 +79,23 @@ resource "aws_ecs_task_definition" "app" {
         }
       ]
 
-      # Environment variables (non-secret)
+      # REPLACE: non-secret env vars live in var.app_environment (terraform.tfvars).
+      # PORT is injected automatically from var.app_port — a common convention;
+      # remove it from the merge below if your app does not read it.
       environment = [
-        { name = "FLASK_ENV", value = "production" },
-        { name = "PORT", value = tostring(var.app_port) }
+        for k, v in merge(var.app_environment, { PORT = tostring(var.app_port) }) :
+        { name = k, value = v }
       ]
 
       # Secrets from AWS Secrets Manager (injected as env vars).
       # The ECS agent reads these ARNs at task startup, fetches the values
       # using the execution role, and injects them as environment variables.
       # We use the .arn from the data sources above (never a hardcoded ARN).
+      # REPLACE: env var names via var.env_database_url / var.env_secret_key.
+      # If your app has no signing key, remove the second entry AND its data source.
       secrets = [
-        { name = "DATABASE_URL", valueFrom = data.aws_secretsmanager_secret.db_url.arn },
-        { name = "SECRET_KEY", valueFrom = data.aws_secretsmanager_secret.secret_key.arn }
+        { name = var.env_database_url, valueFrom = data.aws_secretsmanager_secret.db_url.arn },
+        { name = var.env_secret_key, valueFrom = data.aws_secretsmanager_secret.secret_key.arn }
       ]
 
       logConfiguration = {
@@ -121,7 +132,7 @@ resource "aws_ecs_service" "app" {
 
   load_balancer {
     target_group_arn = aws_lb_target_group.app.arn
-    container_name   = "app"
+    container_name   = var.app_name
     container_port   = var.app_port
   }
 

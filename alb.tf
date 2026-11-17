@@ -1,3 +1,8 @@
+# ── Application Load Balancer ───────────────────────────
+# ⚠️ APP-SPECIFIC: health check path + expected status come from
+# var.health_check_path / var.health_check_matcher (terraform.tfvars).
+# Portul containerului vine din var.app_port.
+
 # Load Balancer (în subnets publice)
 resource "aws_lb" "main" {
   name               = "${var.project_name}-${var.environment}-alb"
@@ -22,12 +27,12 @@ resource "aws_lb_target_group" "app" {
   target_type = "ip" # pentru Fargate
 
   health_check {
-    path                = var.health_check_path # /health
+    path                = var.health_check_path # REPLACE: /health for TradeScheduler
     healthy_threshold   = 2
     unhealthy_threshold = 3
     timeout             = 5
     interval            = 30
-    matcher             = "200"
+    matcher             = var.health_check_matcher # REPLACE: expected status code
   }
 
   tags = {

@@ -1,4 +1,7 @@
-# Root module: orchestrates all infrastructure for TradeScheduler on AWS.
+# Root module: orchestrates all infrastructure for the application on AWS.
+#
+# ⚠️ APP-SPECIFIC: var.app_port (container/SG) and var.db_port (RDS SG)
+# are defined in variables.tf and overridable in terraform.tfvars.
 
 terraform {
   required_version = ">= 1.5.0"
@@ -100,9 +103,9 @@ resource "aws_security_group" "rds" {
   vpc_id      = module.vpc.vpc_id
 
   ingress {
-    description     = "PostgreSQL from ECS"
-    from_port       = 5432
-    to_port         = 5432
+    description     = "Database from ECS"
+    from_port       = var.db_port
+    to_port         = var.db_port
     protocol        = "tcp"
     security_groups = [aws_security_group.ecs.id]
   }

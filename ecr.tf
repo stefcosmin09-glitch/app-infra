@@ -1,6 +1,7 @@
 # ── ECR Repository ─────────────────────────────────────
-resource "aws_ecr_repository" "tradescheduler" {
-  name                 = "tradescheduler"
+# ⚠️ APP-SPECIFIC: repository name comes from var.app_name (terraform.tfvars).
+resource "aws_ecr_repository" "app" {
+  name                 = var.app_name
   image_tag_mutability = "MUTABLE"
 
   image_scanning_configuration {
@@ -13,7 +14,7 @@ resource "aws_ecr_repository" "tradescheduler" {
   force_delete = true
 
   tags = {
-    Name        = "tradescheduler"
+    Name        = var.app_name
     Project     = var.project_name
     Environment = var.environment
   }
