@@ -32,6 +32,25 @@ variable "container_image" {
   default     = ""
 }
 
+# Fargate sizing — generic tuning knobs (safe to override per environment).
+variable "task_cpu" {
+  description = "Fargate CPU units (256 = 0.25 vCPU)"
+  type        = number
+  default     = 256
+}
+
+variable "task_memory" {
+  description = "Fargate memory in MB (512 = 0.5 GB)"
+  type        = number
+  default     = 512
+}
+
+variable "desired_count" {
+  description = "Number of ECS tasks to keep running"
+  type        = number
+  default     = 1
+}
+
 # ═══════════════════════════════════════════════════════════════════
 # ⚠️ APP-SPECIFIC — REPLACE THESE VALUES FOR A DIFFERENT APPLICATION
 # Everything below describes TradeScheduler. Override in terraform.tfvars.

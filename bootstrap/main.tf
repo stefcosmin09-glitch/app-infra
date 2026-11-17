@@ -1,4 +1,5 @@
-# Bootstrap: creates the S3 bucket + DynamoDB table used as Terraform backend.
+# Bootstrap: creates the S3 bucket used as Terraform backend.
+# Locking is native S3 (use_lockfile = true in ../backend.tf); no DynamoDB.
 # This directory uses LOCAL state (no backend block) because the backend
 # does not exist yet — chicken-and-egg problem.
 # Run once: cd bootstrap && terraform init && terraform apply

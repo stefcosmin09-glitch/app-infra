@@ -44,7 +44,8 @@ resource "aws_db_instance" "main" {
   vpc_security_group_ids = [aws_security_group.rds.id]
   publicly_accessible    = false
 
-  # Backup: 7 days retention (free tier includes automated backups)
+  # Backup: 1 day — free-tier accounts reject longer retention
+  # (FreeTierRestrictionError). Use 7+ days in production.
   backup_retention_period = 1
 
   # Demo-only: skip final snapshot so terraform destroy is fast.

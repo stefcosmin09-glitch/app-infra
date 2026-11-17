@@ -5,7 +5,8 @@ variable "region" {
 }
 
 variable "state_bucket_name" {
-  description = "Globally unique S3 bucket name for Terraform state"
+  # REPLACE: include your own AWS account ID — S3 names are globally unique.
+  description = "REPLACE: globally unique S3 bucket name for Terraform state"
   type        = string
   default     = "app-infra-tfstate-970785194112"
 }

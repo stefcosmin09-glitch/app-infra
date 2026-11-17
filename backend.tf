@@ -1,5 +1,9 @@
-# Remote state: S3 bucket + DynamoDB lock table (created by bootstrap/).
+# Remote state: S3 bucket created by bootstrap/.
+# Locking is native S3 (use_lockfile = true) — no DynamoDB table.
 # Do NOT commit terraform.tfstate — it lives in S3.
+#
+# ⚠️ REPLACE: bucket / key / region must match your own bootstrap/ before
+# reusing this template in another account (Terraform forbids variables here).
 
 terraform {
   backend "s3" {

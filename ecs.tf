@@ -59,8 +59,8 @@ resource "aws_ecs_task_definition" "app" {
   family                   = "${var.project_name}-${var.environment}-task"
   network_mode             = "awsvpc" # required for Fargate
   requires_compatibilities = ["FARGATE"]
-  cpu                      = "256" # 0.25 vCPU
-  memory                   = "512" # 0.5 GB
+  cpu                      = tostring(var.task_cpu)    # 256 = 0.25 vCPU
+  memory                   = tostring(var.task_memory) # 512 = 0.5 GB
   execution_role_arn       = aws_iam_role.ecs_execution.arn
   task_role_arn            = aws_iam_role.ecs_task.arn
 
@@ -121,7 +121,7 @@ resource "aws_ecs_service" "app" {
   name            = "${var.project_name}-${var.environment}-service"
   cluster         = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.app.arn
-  desired_count   = 1
+  desired_count   = var.desired_count
   launch_type     = "FARGATE"
 
   network_configuration {

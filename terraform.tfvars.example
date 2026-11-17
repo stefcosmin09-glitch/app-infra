@@ -33,8 +33,15 @@ app_environment = {
 # ───────────────────────────────────────────────────────────────────
 # Generic settings — usually unchanged
 # ───────────────────────────────────────────────────────────────────
-region      = "eu-central-1"
-environment = "staging"
+region       = "eu-central-1"
+environment  = "staging"
+project_name = "app-infra"
+vpc_cidr     = "10.0.0.0/20"
+
+# Fargate sizing (defaults shown)
+task_cpu      = 256    # 0.25 vCPU
+task_memory   = 512    # 0.5 GB
+desired_count = 1
 
 # Set after building and pushing the Docker image to ECR:
 # container_image = "123456789012.dkr.ecr.eu-central-1.amazonaws.com/tradescheduler:latest"

@@ -58,7 +58,7 @@ Outside the VPC:
 | **`target_type = "ip"`** | Fargate has no EC2 host to register — ALB targets the task's IP directly. |
 | **Single NAT Gateway** | ~$32/month instead of ~$64. Non-HA, explicitly accepted for a demo; documented as the first thing to change in production. |
 | **RDS Single-AZ `db.t3.micro`** | Cheapest PostgreSQL that matches the app's production stack. `backup_retention_period = 1` because free-tier accounts reject longer retention. |
-| **Secrets in Secrets Manager** | ECS agent injects them as env vars at startup via `valueFrom`; no password in code, GitHub, or Terraform state. |
+| **Secrets in Secrets Manager** | ECS agent injects them as env vars at startup via `valueFrom`; no password in code or GitHub. Note: `db_password` **is** stored in the encrypted Terraform state — that is why the state bucket is private and encrypted (and why `terraform.tfvars` is gitignored). |
 | **`data "aws_secretsmanager_secret"`** | AWS appends a random 6-char suffix to secret ARNs. Looking up by name returns the real ARN; a hardcoded ARN silently fails at task startup. |
 | **S3 backend with `use_lockfile = true`** | Native S3 locking — no separate DynamoDB table to maintain. |
 | **`MUTABLE` ECR tags** | Simpler for a demo (`latest`). In production, prefer immutable tags plus a digest pinned in the task definition. |
@@ -83,7 +83,11 @@ app-infra/
 ├── scripts/
 │   ├── create-secrets.sh    # bootstrap Secrets Manager from gitignored tfvars
 │   └── build-and-push.sh    # build image → login → tag → push to ECR
+├── .github/workflows/
+│   └── terraform.yml        # CI: fmt -check + validate (no AWS creds needed)
+├── .terraform.lock.hcl      # pins provider versions — commit this!
 ├── terraform.tfvars.example # safe example values
+├── INVATARI.md              # learning notes + interview Q&A (Romanian)
 └── README.md
 ```
 
@@ -106,6 +110,7 @@ This is a **complete application deploy**, not just empty infrastructure. Everyt
 | Non-secret env vars | `app_environment` | `{ FLASK_ENV = "production" }` | — |
 | App source directory | — | `../scheduler-app` | `APP_DIR` |
 | Image tag | `container_image` | `latest` | `IMAGE_TAG` |
+| Fargate CPU / memory / count | `task_cpu`, `task_memory`, `desired_count` | `256`, `512`, `1` | — |
 
 **Three contracts your new app must satisfy**, or ECS will never become healthy:
 
@@ -147,7 +152,7 @@ terraform apply -target=aws_db_instance.main -auto-approve
 bash scripts/create-secrets.sh
 
 # 4. Create ECR, then build/push the image (avoids ECS restart loops)
-terraform apply -target=aws_ecr_repository.tradescheduler -auto-approve
+terraform apply -target=aws_ecr_repository.app -auto-approve
 bash scripts/build-and-push.sh
 
 # 5. Apply the rest

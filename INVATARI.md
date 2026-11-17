@@ -162,7 +162,7 @@ Asta e poate cel mai util lucru învățat — infrastructura are o **ordine log
 1. `bootstrap` → bucketul de stare
 2. `terraform apply -target=aws_db_instance.main` → RDS-ul, ca să avem endpointul
 3. `scripts/create-secrets.sh` → secreturile (folosesc endpointul RDS)
-4. `terraform apply -target=aws_ecr_repository.tradescheduler` → repository-ul
+4. `terraform apply -target=aws_ecr_repository.app` → repository-ul
 5. `scripts/build-and-push.sh` → imaginea în ECR
 6. `terraform plan` + `apply` → tot restul (ECS poate acum porni taskuri care chiar funcționează)
 7. `curl /health` → verificare

@@ -2,7 +2,7 @@
 *.tfstate
 *.tfstate.*
 .terraform/
-.terraform.lock.hcl
+# .terraform.lock.hcl is COMMITTED on purpose — it pins provider versions.
 terraform.tfvars
 *.tfvars.json
 crash.log
@@ -18,5 +18,5 @@ override.tf.json
 
 # OS
 .DS_Store
-Thumbs.db.swp
+Thumbs.db
 *.swp

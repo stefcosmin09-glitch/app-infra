@@ -31,3 +31,19 @@ output "db_endpoint" {
   description = "RDS PostgreSQL endpoint (host only, no port)"
   value       = aws_db_instance.main.address
 }
+
+# Network identifiers — useful for debugging and for adding new resources.
+output "vpc_id" {
+  description = "ID of the VPC created by the vpc module"
+  value       = module.vpc.vpc_id
+}
+
+output "public_subnet_ids" {
+  description = "IDs of the public subnets (ALB, NAT Gateway)"
+  value       = module.vpc.public_subnet_ids
+}
+
+output "private_subnet_ids" {
+  description = "IDs of the private subnets (ECS tasks, RDS)"
+  value       = module.vpc.private_subnet_ids
+}

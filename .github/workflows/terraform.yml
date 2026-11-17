@@ -1,0 +1,40 @@
+name: Terraform validate
+
+# Cheap, credential-free checks on every push/PR that touches Terraform.
+# We deliberately do NOT run plan/apply here: that needs AWS credentials and
+# would create real (billable) resources. Plan/apply stays a manual, reviewed step.
+on:
+  push:
+    paths:
+      - '**.tf'
+      - '**.tfvars.example'
+      - '.terraform.lock.hcl'
+      - '.github/workflows/terraform.yml'
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '~> 1.5'
+
+      # -backend=false avoids contacting S3, so no AWS credentials are needed.
+      - name: Init root module (no backend)
+        run: terraform init -backend=false -input=false
+
+      - name: Check formatting (all modules)
+        run: terraform fmt -check -recursive
+
+      - name: Validate root module
+        run: terraform validate
+
+      # bootstrap/ is a separate Terraform root with its own local state.
+      - name: Validate bootstrap module
+        working-directory: bootstrap
+        run: |
+          terraform init -backend=false -input=false
+          terraform validate

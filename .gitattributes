@@ -1,0 +1,4 @@
+# Shell scripts must keep LF line endings even when cloned on Windows.
+# Otherwise WSL/Git Bash sees a trailing \r and fails with:
+#   $'\r': command not found
+*.sh text eol=lf
