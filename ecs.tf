@@ -37,11 +37,10 @@ resource "aws_ecs_cluster" "main" {
 # ── Secrets Manager lookups ─────────────────────────────
 # We look secrets up BY NAME, never by a hand-built ARN.
 #
-# WHY: AWS appends a random 6-character suffix to every secret ARN.
-#   name: "app-infra/staging/db-url"
-#   real ARN: "...:secret:app-infra/staging/db-url-A1b2C3"
-# If we build the ARN ourselves (as before), it is missing that suffix,
-# ECS cannot find the secret, and the task fails at startup.
+# WHY: AWS appends a random 6-character suffix to every secret ARN, so a
+# hand-built ARN (missing that suffix) does not match the real secret.
+# If we built the ARN ourselves, ECS could not find the secret and the task
+# would fail at startup. We let the data source ask AWS for the full ARN.
 # A data source asks AWS for the real, complete ARN instead.
 #
 # IMPORTANT: data sources are read at PLAN time, so these secrets must
